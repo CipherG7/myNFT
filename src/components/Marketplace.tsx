@@ -115,22 +115,24 @@ export function Marketplace() {
     <div>
       <Heading size="4" className="mb-4">NFT Marketplace</Heading>
       <Text className="mb-6">Browse and buy NFTs listed for sale.</Text>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {listings.length === 0 ? (
-          <Text>No NFTs listed for sale currently.</Text>
-        ) : (
-          listings.map(({ id, name, ask, url, nftId }) => (
-            <NFTCard
-              key={id}
-              id={nftId}
-              name={name}
-              price={`${ask} SUI`}
-              url={url}
-              // Add buy button handler with placeholder coinId
-              onBuy={() => handleBuy(nftId, ask, "0xcoinobjectidplaceholder")}
-            />
-          ))
-        )}
+      <div className="h-96 overflow-y-auto bg-gray-700 p-4 rounded-lg">
+        <div className="flex flex-col gap-4">
+          {listings.length === 0 ? (
+            <Text>No NFTs listed for sale currently.</Text>
+          ) : (
+            listings.map(({ id, name, ask, url, nftId }) => (
+              <NFTCard
+                key={id}
+                id={nftId}
+                name={name}
+                price={`${ask} SUI`}
+                url={url}
+                // Add buy button handler with placeholder coinId
+                onBuy={() => handleBuy(nftId, ask, "0xcoinobjectidplaceholder")}
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

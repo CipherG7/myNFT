@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ConnectButton } from "@mysten/dapp-kit";
 import { Box, Container, Flex, Heading } from "@radix-ui/themes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { WalletStatus } from "./WalletStatus";
 import { MintNFT } from "./components/MintNFT";
 import { Marketplace } from "./components/Marketplace";
 import { MyMintedNFTs } from "./components/MyMintedNFTsNew";
@@ -20,8 +19,9 @@ function App() {
         justify="between"
         className="border-b border-gray-700"
       >
+        <Box></Box>
         <Box>
-          <Heading>myNFT Marketplace</Heading>
+          <Heading className="text-center">NFT MarketPlace</Heading>
         </Box>
         <Box>
           <ConnectButton />
@@ -35,16 +35,16 @@ function App() {
             <TabsTrigger value="mint">Mint</TabsTrigger>
             <TabsTrigger value="take-profits">Take Profits</TabsTrigger>
           </TabsList>
-          <TabsContent value="my-nfts" className="mt-6">
+          <TabsContent value="my-nfts" className="mt-6 bg-gray-600 p-4 rounded-lg">
             <MyMintedNFTs />
           </TabsContent>
-          <TabsContent value="marketplace" className="mt-6">
+          <TabsContent value="marketplace" className="mt-6 bg-gray-600 p-4 rounded-lg">
             <Marketplace />
           </TabsContent>
-          <TabsContent value="mint" className="mt-6">
+          <TabsContent value="mint" className="mt-6 bg-gray-600 p-4 rounded-lg">
             <MintNFT />
           </TabsContent>
-          <TabsContent value="take-profits" className="mt-6">
+          <TabsContent value="take-profits" className="mt-6 bg-gray-600 p-4 rounded-lg">
             <TakeProfits />
           </TabsContent>
         </Tabs>
