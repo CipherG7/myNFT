@@ -5,42 +5,44 @@ use sui::coin::Coin;
 use sui::dynamic_object_field as dof;
 use sui::table::{Self, Table};
 use mynft::testnet_nft::{TestnetNFT};
+use sui::sui::SUI;
+
 
 const EAmountIncorrect: u64 = 0;
 const ENotOwner: u64 = 1;
 
-public struct Marketplace has key {
+public struct Marketplace<phantom SUI> has key {
     id: UID,
     items: Bag,
-    payments: Table<address, Coin<0x2::sui::SUI>>,
+    payments: Table<address, Coin<SUI>>,
 }
 
 public struct Listing has key, store {
     id: UID,
-    ask: u64,
+    price: u64,
     owner: address,
 }
 
-public entry fun create(ctx: &mut TxContext) {
-    let id = object::new(ctx);
-    let items = bag::new(ctx);
-    let payments = table::new<address, Coin<0x2::sui::SUI>>(ctx);
-    transfer::share_object(Marketplace {
-        id,
-        items,
-        payments,
-    })
+
+public fun create_marketplace<SUI>(ctx: &mut TxContext){
+    let marketplace = Marketplace<SUI> {
+        id: object::new(ctx),
+        items: bag::new(ctx),
+        payments: table::new(ctx)
+    };
+    transfer::share_object(marketplace)
+
 }
 
 public fun list(
-    marketplace: &mut Marketplace,
+    marketplace: &mut Marketplace<SUI>,
     nft: TestnetNFT,
-    ask: u64,
+    price: u64,
     ctx: &mut TxContext,
 ) {
     let nft_id = object::id(&nft);
     let mut listing = Listing {
-        ask,
+        price,
         id: object::new(ctx),
         owner: ctx.sender(),
     };
@@ -50,9 +52,9 @@ public fun list(
 }
 
 fun delist(
-    marketplace: &mut Marketplace,
+    marketplace: &mut Marketplace<SUI>,
     nft_id: ID,
-    ctx: &TxContext,
+    ctx: &TxContext
 ): TestnetNFT {
     let Listing { mut id, owner, .. } = bag::remove(
         &mut marketplace.items,
@@ -68,7 +70,7 @@ fun delist(
 
 #[allow(lint(self_transfer))]
 public fun delist_and_take(
-    marketplace: &mut Marketplace,
+    marketplace: &mut Marketplace<SUI>,
     nft_id: ID,
     ctx: &mut TxContext,
 ) {
@@ -77,17 +79,17 @@ public fun delist_and_take(
 }
 
 fun buy(
-    marketplace: &mut Marketplace,
+    marketplace: &mut Marketplace<SUI>,
     nft_id: ID,
-    paid: Coin<0x2::sui::SUI>,
+    paid: Coin<SUI>,
 ): TestnetNFT {
     let Listing {
         mut id,
-        ask,
+        price,
         owner,
     } = marketplace.items.remove(nft_id);
 
-    assert!(ask == paid.value(), EAmountIncorrect);
+    assert!(price == paid.value(), EAmountIncorrect);
 
     if (marketplace.payments.contains(owner)) {
         marketplace.payments.borrow_mut(owner).join(paid)
@@ -102,9 +104,9 @@ fun buy(
 
 #[allow(lint(self_transfer))]
 public fun buy_and_take(
-    marketplace: &mut Marketplace,
+    marketplace: &mut Marketplace<SUI>,
     nft_id: ID,
-    paid: Coin<0x2::sui::SUI>,
+    paid: Coin<SUI>,
     ctx: &mut TxContext,
 ) {
     transfer::public_transfer(
@@ -114,15 +116,15 @@ public fun buy_and_take(
 }
 
 fun take_profits(
-    marketplace: &mut Marketplace,
+    marketplace: &mut Marketplace<SUI>,
     ctx: &TxContext,
-): Coin<0x2::sui::SUI> {
+): Coin<SUI> {
     marketplace.payments.remove(ctx.sender())
 }
 
 #[lint_allow(self_transfer)]
 public fun take_profits_and_keep(
-    marketplace: &mut Marketplace,
+    marketplace: &mut Marketplace<SUI>,
     ctx: &mut TxContext,
 ) {
     transfer::public_transfer(
