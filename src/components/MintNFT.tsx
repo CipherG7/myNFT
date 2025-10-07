@@ -3,18 +3,24 @@ import { useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { Heading } from "@radix-ui/themes";
 import { PACKAGE_ID } from "../constants";
+import { LoadingSpinner } from "./LoadingSpinner";
+import toast from "react-hot-toast";
 
 export function MintNFT() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  const [isMinting, setIsMinting] = useState(false);
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   const handleMint = async () => {
     if (!name || !description || !url) {
-      alert("Please fill in all fields");
+      toast.error("Please fill in all fields");
       return;
     }
+
+    setIsMinting(true);
+    const toastId = toast.loading("Minting NFT...");
 
     try {
       const tx = new Transaction();
@@ -31,23 +37,26 @@ export function MintNFT() {
       await signAndExecuteTransaction({
         transaction: tx,
       });
-      alert("NFT minted successfully!");
+
+      toast.success("NFT minted successfully!", { id: toastId });
       setName("");
       setDescription("");
       setUrl("");
     } catch (error) {
-      alert("Minting failed: " + error);
+      toast.error(`Minting failed: ${error}`, { id: toastId });
+    } finally {
+      setIsMinting(false);
     }
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 0' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(16px, 4vw, 32px) 0' }}>
       <div
         style={{
           width: '100%',
           maxWidth: '600px',
           backgroundColor: '#F8FAFB',
-          padding: '48px',
+          padding: 'clamp(24px, 6vw, 48px)',
           borderRadius: '12px',
           border: '1px solid #E2E8F0',
         }}
@@ -143,30 +152,41 @@ export function MintNFT() {
           <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
             <button
               onClick={handleMint}
+              disabled={isMinting}
               style={{
-                width: '200px',
+                width: '100%',
+                maxWidth: '200px',
                 height: '48px',
                 borderRadius: '8px',
-                backgroundColor: '#4DA2FF',
+                backgroundColor: isMinting ? '#94A3B8' : '#4DA2FF',
                 color: '#FFFFFF',
                 fontWeight: '600',
                 fontSize: '1rem',
                 transition: 'all 250ms ease-in-out',
-                cursor: 'pointer',
+                cursor: isMinting ? 'not-allowed' : 'pointer',
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#0B93E8';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                if (!isMinting) {
+                  e.currentTarget.style.backgroundColor = '#0B93E8';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#4DA2FF';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                if (!isMinting) {
+                  e.currentTarget.style.backgroundColor = '#4DA2FF';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                }
               }}
             >
-              Mint NFT
+              {isMinting && <LoadingSpinner size="sm" color="#FFFFFF" />}
+              {isMinting ? 'Minting...' : 'Mint NFT'}
             </button>
           </div>
         </div>
