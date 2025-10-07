@@ -93,14 +93,96 @@ export function MyMintedNFTs() {
 
   return (
     <div>
-      <Heading size="4" className="mb-4">My Minted NFTs</Heading>
-      <Text className="mb-6">Your owned NFTs. List them for sale.</Text>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {nfts.length === 0 ? (
-          <Text>No NFTs owned.</Text>
-        ) : (
-          nfts.map(({ id, name, url }) => (
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <Heading
+            size="6"
+            style={{
+              color: '#1A202C',
+              fontWeight: '700',
+              marginBottom: '8px',
+              letterSpacing: '-0.025em',
+            }}
+          >
+            My NFTs
+          </Heading>
+          <Text style={{ color: '#64748B', fontSize: '0.875rem' }}>
+            Your owned NFTs. List them for sale on the marketplace.
+          </Text>
+        </div>
+        <button
+          onClick={fetchOwnedNFTs}
+          style={{
+            backgroundColor: '#4DA2FF',
+            color: '#FFFFFF',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            transition: 'all 250ms ease-in-out',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#0B93E8';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#4DA2FF';
+          }}
+        >
+          Refresh
+        </button>
+      </div>
+
+      {nfts.length === 0 ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '300px',
+            gap: '16px',
+          }}
+        >
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              backgroundColor: '#E5F3FF',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#4DA2FF"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+          </div>
+          <Text style={{ color: '#64748B', fontSize: '0.875rem' }}>
+            No NFTs owned yet. Mint your first NFT!
+          </Text>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '20px',
+          }}
+        >
+          {nfts.map(({ id, name, url }) => (
             <NFTCard
               key={id}
               id={id}
@@ -109,10 +191,9 @@ export function MyMintedNFTs() {
               url={url}
               onList={(price) => handleList(id, price)}
             />
-          ))
-        )}
-      </div>
-      <button onClick={fetchOwnedNFTs} className="w-40 h-12 rounded-2xl bg-black text-white border-2 border-black hover:bg-gray-800">Refresh NFTs</button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
