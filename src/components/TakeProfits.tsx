@@ -1,5 +1,5 @@
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
-import { Button, Flex, Heading, Text } from "@radix-ui/themes";
+import { Flex, Heading, Text } from "@radix-ui/themes";
 import { Transaction } from "@mysten/sui/transactions";
 import { MARKETPLACE_TYPE } from "../marketplaceConstants";
 
@@ -34,16 +34,16 @@ export function TakeProfits() {
   };
 
   if (!account) {
-    return <Text>Please connect your wallet to take profits.</Text>;
+    return <Text className="text-black">Please connect your wallet to take profits.</Text>;
   }
 
   return (
     <Flex direction="column" gap="4" my="2">
-      <Heading size="4">Take Profits</Heading>
-      <Text>Withdraw your earnings from NFT sales.</Text>
-      <Button onClick={handleTakeProfits} className="w-fit">
+      <Heading size="4" className="text-black">Take Profits</Heading>
+      <Text className="text-black">Withdraw your earnings from NFT sales.</Text>
+      <button onClick={handleTakeProfits} className="w-40 h-12 rounded-2xl bg-black text-white border-2 border-black hover:bg-gray-800">
         Take Profits
-      </Button>
+      </button>
     </Flex>
   );
 }

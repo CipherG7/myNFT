@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Heading, Text, Button } from "@radix-ui/themes";
+import { Heading, Text } from "@radix-ui/themes";
 import { NFTCard } from "./NFTCard";
 import { useCurrentAccount, useSuiClient, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
@@ -95,7 +95,7 @@ export function MyMintedNFTs() {
     <div>
       <Heading size="4" className="mb-4">My Minted NFTs</Heading>
       <Text className="mb-6">Your owned NFTs. List them for sale.</Text>
-      <Button onClick={fetchOwnedNFTs} className="mb-4">Refresh NFTs</Button>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {nfts.length === 0 ? (
           <Text>No NFTs owned.</Text>
@@ -112,6 +112,7 @@ export function MyMintedNFTs() {
           ))
         )}
       </div>
+      <button onClick={fetchOwnedNFTs} className="w-40 h-12 rounded-2xl bg-black text-white border-2 border-black hover:bg-gray-800">Refresh NFTs</button>
     </div>
   );
 }

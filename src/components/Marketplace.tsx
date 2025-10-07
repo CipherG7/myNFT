@@ -113,12 +113,12 @@ export function Marketplace() {
 
   return (
     <div>
-      <Heading size="4" className="mb-4">NFT Marketplace</Heading>
-      <Text className="mb-6">Browse and buy NFTs listed for sale.</Text>
-      <div className="h-96 overflow-y-auto bg-gray-700 p-4 rounded-lg">
+      <Heading size="4" className="mb-4 text-black">NFT Marketplace</Heading>
+      <Text className="mb-6 text-black">Browse and buy NFTs listed for sale.</Text>
+      <div className="h-96 overflow-y-auto bg-white border-2 border-black p-4 rounded-lg">
         <div className="flex flex-col gap-4">
           {listings.length === 0 ? (
-            <Text>No NFTs listed for sale currently.</Text>
+            <Text className="text-black">No NFTs listed for sale currently.</Text>
           ) : (
             listings.map(({ id, name, ask, url, nftId }) => (
               <NFTCard
