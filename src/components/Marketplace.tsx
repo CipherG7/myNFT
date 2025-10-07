@@ -2,9 +2,11 @@
 import { useEffect, useState } from "react";
 import { Heading, Text } from "@radix-ui/themes";
 import { NFTCard } from "./NFTCard";
+import { NFTCardSkeleton } from "./NFTCardSkeleton";
 import { useCurrentAccount, useSuiClient, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { MARKETPLACE_TYPE } from "../marketplaceConstants";
+import toast from "react-hot-toast";
 
 // Marketplace object ID
 const MARKETPLACE_OBJECT_ID = "0xece2306b9e52fbdafa0405a6276ee2cd182aec1fc5900cc22edadb38414acc1a";
@@ -20,12 +22,15 @@ interface Listing {
 
 export function Marketplace() {
   const [listings, setListings] = useState<Listing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [buyingNftId, setBuyingNftId] = useState<string | null>(null);
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   useEffect(() => {
     async function fetchListings() {
+      setIsLoading(true);
       try {
         // Get dynamic fields of the marketplace (bag entries)
         const dynamicFields = await suiClient.getDynamicFields({
@@ -75,7 +80,10 @@ export function Marketplace() {
         setListings(fetchedListings);
       } catch (error) {
         console.error("Failed to fetch listings", error);
+        toast.error("Failed to load marketplace listings");
         setListings([]);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -84,9 +92,13 @@ export function Marketplace() {
 
   async function handleBuy(nftId: string, _price: number, coinId: string) {
     if (!account) {
-      alert("Please connect your wallet to buy NFTs.");
+      toast.error("Please connect your wallet to buy NFTs");
       return;
     }
+
+    setBuyingNftId(nftId);
+    const toastId = toast.loading("Processing purchase...");
+
     try {
       const tx = new Transaction();
       // Construct the buy_and_take call transaction with correct arguments
@@ -103,11 +115,14 @@ export function Marketplace() {
       await signAndExecuteTransaction({
         transaction: tx,
       });
-      alert("NFT purchased successfully!");
+
+      toast.success("NFT purchased successfully!", { id: toastId });
       // Refresh listings after purchase
       setListings((prev) => prev.filter((listing) => listing.nftId !== nftId));
     } catch (error) {
-      alert("Purchase failed: " + error);
+      toast.error(`Purchase failed: ${error}`, { id: toastId });
+    } finally {
+      setBuyingNftId(null);
     }
   }
 
@@ -140,7 +155,19 @@ export function Marketplace() {
           borderRadius: '12px',
         }}
       >
-        {listings.length === 0 ? (
+        {isLoading ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '20px',
+            }}
+          >
+            {[1, 2, 3].map((i) => (
+              <NFTCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : listings.length === 0 ? (
           <div
             style={{
               display: 'flex',
@@ -197,6 +224,7 @@ export function Marketplace() {
                 price={`${ask} SUI`}
                 url={url}
                 onBuy={() => handleBuy(nftId, ask, "0xcoinobjectidplaceholder")}
+                isLoading={buyingNftId === nftId}
               />
             ))}
           </div>
