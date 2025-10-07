@@ -82,7 +82,7 @@ export function Marketplace() {
     fetchListings();
   }, [suiClient]);
 
-  async function handleBuy(nftId: string, price: number, coinId: string) {
+  async function handleBuy(nftId: string, _price: number, coinId: string) {
     if (!account) {
       alert("Please connect your wallet to buy NFTs.");
       return;
@@ -113,26 +113,94 @@ export function Marketplace() {
 
   return (
     <div>
-      <Heading size="4" className="mb-4 text-black">NFT Marketplace</Heading>
-      <Text className="mb-6 text-black">Browse and buy NFTs listed for sale.</Text>
-      <div className="h-96 overflow-y-auto bg-white border-2 border-black p-4 rounded-lg">
-        <div className="flex flex-col gap-4">
-          {listings.length === 0 ? (
-            <Text className="text-black">No NFTs listed for sale currently.</Text>
-          ) : (
-            listings.map(({ id, name, ask, url, nftId }) => (
+      <div style={{ marginBottom: '24px' }}>
+        <Heading
+          size="6"
+          style={{
+            color: '#1A202C',
+            fontWeight: '700',
+            marginBottom: '8px',
+            letterSpacing: '-0.025em',
+          }}
+        >
+          NFT Marketplace
+        </Heading>
+        <Text style={{ color: '#64748B', fontSize: '0.875rem' }}>
+          Browse and buy NFTs listed for sale
+        </Text>
+      </div>
+
+      <div
+        style={{
+          height: '500px',
+          overflowY: 'auto',
+          backgroundColor: '#F8FAFB',
+          border: '1px solid #E2E8F0',
+          padding: '16px',
+          borderRadius: '12px',
+        }}
+      >
+        {listings.length === 0 ? (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              gap: '16px',
+            }}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                backgroundColor: '#E5F3FF',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#4DA2FF"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </div>
+            <Text style={{ color: '#64748B', fontSize: '0.875rem' }}>
+              No NFTs listed for sale currently
+            </Text>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '20px',
+            }}
+          >
+            {listings.map(({ id, name, ask, url, nftId }) => (
               <NFTCard
                 key={id}
                 id={nftId}
                 name={name}
                 price={`${ask} SUI`}
                 url={url}
-                // Add buy button handler with placeholder coinId
                 onBuy={() => handleBuy(nftId, ask, "0xcoinobjectidplaceholder")}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
