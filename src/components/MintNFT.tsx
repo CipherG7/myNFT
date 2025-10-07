@@ -41,38 +41,135 @@ export function MintNFT() {
   };
 
   return (
-    <div className="flex items-center justify-center py-8">
-      <div className="w-full max-w-2xl bg-white p-12 shadow-2xl">
-        <Heading size="4" className="mb-12 text-center text-3xl text-black font-bold">Mint New NFT</Heading>
-        <div className="space-y-8">
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 0' }}>
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '600px',
+          backgroundColor: '#F8FAFB',
+          padding: '48px',
+          borderRadius: '12px',
+          border: '1px solid #E2E8F0',
+        }}
+      >
+        <Heading
+          size="6"
+          style={{
+            marginBottom: '32px',
+            textAlign: 'center',
+            color: '#1A202C',
+            fontWeight: '700',
+            letterSpacing: '-0.025em',
+          }}
+        >
+          Mint New NFT
+        </Heading>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <input
             type="text"
             placeholder="NFT Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full h-14 px-5 rounded-3xl bg-white text-black placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-black border-2 border-black focus:border-black transition-all duration-200"
+            style={{
+              width: '100%',
+              height: '56px',
+              padding: '0 20px',
+              borderRadius: '8px',
+              backgroundColor: '#FFFFFF',
+              color: '#1A202C',
+              border: '1px solid #E2E8F0',
+              fontSize: '0.875rem',
+              transition: 'all 250ms ease-in-out',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#4DA2FF';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(77, 162, 255, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#E2E8F0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
           <input
             type="text"
             placeholder="NFT Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full h-14 px-5 rounded-3xl bg-white text-black placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-black border-2 border-black focus:border-black transition-all duration-200"
+            style={{
+              width: '100%',
+              height: '56px',
+              padding: '0 20px',
+              borderRadius: '8px',
+              backgroundColor: '#FFFFFF',
+              color: '#1A202C',
+              border: '1px solid #E2E8F0',
+              fontSize: '0.875rem',
+              transition: 'all 250ms ease-in-out',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#4DA2FF';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(77, 162, 255, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#E2E8F0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
           <input
             type="text"
-            placeholder="NFT URL"
+            placeholder="NFT Image URL"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            className="w-full h-14 px-5 rounded-3xl bg-white text-black placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-black border-2 border-black focus:border-black transition-all duration-200"
+            style={{
+              width: '100%',
+              height: '56px',
+              padding: '0 20px',
+              borderRadius: '8px',
+              backgroundColor: '#FFFFFF',
+              color: '#1A202C',
+              border: '1px solid #E2E8F0',
+              fontSize: '0.875rem',
+              transition: 'all 250ms ease-in-out',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#4DA2FF';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(77, 162, 255, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#E2E8F0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
-          <div className="flex justify-center pt-8">
-            <button onClick={handleMint} className="w-40 max-w-md h-12 rounded-3xl bg-black hover:bg-gray-800 text-white font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-black">
+          <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '16px' }}>
+            <button
+              onClick={handleMint}
+              style={{
+                width: '200px',
+                height: '48px',
+                borderRadius: '8px',
+                backgroundColor: '#4DA2FF',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                fontSize: '1rem',
+                transition: 'all 250ms ease-in-out',
+                cursor: 'pointer',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#0B93E8';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#4DA2FF';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+              }}
+            >
               Mint NFT
             </button>
           </div>
         </div>
-       
       </div>
     </div>
   );
