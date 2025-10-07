@@ -1,5 +1,6 @@
 import { TextField } from "@radix-ui/themes";
 import { useState } from "react";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 interface NFTCardProps {
   id: string;
@@ -8,9 +9,10 @@ interface NFTCardProps {
   url?: string;
   onBuy?: () => void;
   onList?: (price: number) => void;
+  isLoading?: boolean;
 }
 
-export function NFTCard({ id, name, price, url, onBuy, onList }: NFTCardProps) {
+export function NFTCard({ id, name, price, url, onBuy, onList, isLoading = false }: NFTCardProps) {
   const [listPrice, setListPrice] = useState("");
   const [isHovered, setIsHovered] = useState(false);
 
@@ -23,6 +25,7 @@ export function NFTCard({ id, name, price, url, onBuy, onList }: NFTCardProps) {
         border: '1px solid #E2E8F0',
         borderRadius: '12px',
         padding: '16px',
+        width: '100%',
         maxWidth: '320px',
         transition: 'all 250ms ease-in-out',
         transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
@@ -80,27 +83,37 @@ export function NFTCard({ id, name, price, url, onBuy, onList }: NFTCardProps) {
       {onBuy && (
         <button
           onClick={onBuy}
+          disabled={isLoading}
           style={{
             width: '100%',
-            backgroundColor: '#4DA2FF',
+            backgroundColor: isLoading ? '#94A3B8' : '#4DA2FF',
             color: '#FFFFFF',
             padding: '12px 16px',
             borderRadius: '8px',
             fontSize: '0.875rem',
             fontWeight: '600',
             transition: 'all 250ms ease-in-out',
-            cursor: 'pointer',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#0B93E8';
-            e.currentTarget.style.transform = 'scale(1.02)';
+            if (!isLoading) {
+              e.currentTarget.style.backgroundColor = '#0B93E8';
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#4DA2FF';
-            e.currentTarget.style.transform = 'scale(1)';
+            if (!isLoading) {
+              e.currentTarget.style.backgroundColor = '#4DA2FF';
+              e.currentTarget.style.transform = 'scale(1)';
+            }
           }}
         >
-          Buy NFT
+          {isLoading && <LoadingSpinner size="sm" color="#FFFFFF" />}
+          {isLoading ? 'Processing...' : 'Buy NFT'}
         </button>
       )}
 
@@ -128,27 +141,37 @@ export function NFTCard({ id, name, price, url, onBuy, onList }: NFTCardProps) {
                 setListPrice("");
               }
             }}
+            disabled={isLoading}
             style={{
               width: '100%',
-              backgroundColor: '#4DA2FF',
+              backgroundColor: isLoading ? '#94A3B8' : '#4DA2FF',
               color: '#FFFFFF',
               padding: '12px 16px',
               borderRadius: '8px',
               fontSize: '0.875rem',
               fontWeight: '600',
               transition: 'all 250ms ease-in-out',
-              cursor: 'pointer',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#0B93E8';
-              e.currentTarget.style.transform = 'scale(1.02)';
+              if (!isLoading) {
+                e.currentTarget.style.backgroundColor = '#0B93E8';
+                e.currentTarget.style.transform = 'scale(1.02)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#4DA2FF';
-              e.currentTarget.style.transform = 'scale(1)';
+              if (!isLoading) {
+                e.currentTarget.style.backgroundColor = '#4DA2FF';
+                e.currentTarget.style.transform = 'scale(1)';
+              }
             }}
           >
-            List for Sale
+            {isLoading && <LoadingSpinner size="sm" color="#FFFFFF" />}
+            {isLoading ? 'Listing...' : 'List for Sale'}
           </button>
         </div>
       )}
