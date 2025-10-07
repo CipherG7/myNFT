@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Heading, Text } from "@radix-ui/themes";
 import { NFTCard } from "./NFTCard";
+import { NFTCardSkeleton } from "./NFTCardSkeleton";
 import { useCurrentAccount, useSuiClient, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { NFT_TYPE } from "../constants";
 import { MARKETPLACE_TYPE } from "../marketplaceConstants";
+import toast from "react-hot-toast";
 
 // Marketplace object ID
 const MARKETPLACE_OBJECT_ID = "0xece2306b9e52fbdafa0405a6276ee2cd182aec1fc5900cc22edadb38414acc1a";
@@ -17,15 +19,25 @@ interface OwnedNFT {
 
 export function MyMintedNFTs() {
   const [nfts, setNfts] = useState<OwnedNFT[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [listingNftId, setListingNftId] = useState<string | null>(null);
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
-  const fetchOwnedNFTs = async () => {
+  const fetchOwnedNFTs = async (isRefresh = false) => {
     console.log("fetchOwnedNFTs called");
     if (!account) {
       console.log("No account connected");
+      setIsLoading(false);
       return;
+    }
+
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
     }
 
     try {
@@ -52,8 +64,15 @@ export function MyMintedNFTs() {
       console.log("NFTs parsed:", fetchedNFTs.length);
 
       setNfts(fetchedNFTs);
+      if (isRefresh) {
+        toast.success("NFTs refreshed successfully");
+      }
     } catch (error) {
       console.error("Failed to fetch owned NFTs", error);
+      toast.error("Failed to load your NFTs");
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -63,9 +82,12 @@ export function MyMintedNFTs() {
 
   async function handleList(nftId: string, price: number) {
     if (!account) {
-      alert("Please connect your wallet.");
+      toast.error("Please connect your wallet");
       return;
     }
+
+    setListingNftId(nftId);
+    const toastId = toast.loading("Listing NFT...");
 
     try {
       const tx = new Transaction();
@@ -83,17 +105,19 @@ export function MyMintedNFTs() {
         transaction: tx,
       });
 
-      alert("NFT listed successfully!");
+      toast.success("NFT listed successfully!", { id: toastId });
       // Remove from owned NFTs
       setNfts((prev) => prev.filter((nft) => nft.id !== nftId));
     } catch (error) {
-      alert("Listing failed: " + error);
+      toast.error(`Listing failed: ${error}`, { id: toastId });
+    } finally {
+      setListingNftId(null);
     }
   }
 
   return (
     <div>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <Heading
             size="6"
@@ -111,29 +135,46 @@ export function MyMintedNFTs() {
           </Text>
         </div>
         <button
-          onClick={fetchOwnedNFTs}
+          onClick={() => fetchOwnedNFTs(true)}
+          disabled={isRefreshing}
           style={{
-            backgroundColor: '#4DA2FF',
+            backgroundColor: isRefreshing ? '#94A3B8' : '#4DA2FF',
             color: '#FFFFFF',
             padding: '10px 20px',
             borderRadius: '8px',
             fontSize: '0.875rem',
             fontWeight: '600',
             transition: 'all 250ms ease-in-out',
-            cursor: 'pointer',
+            cursor: isRefreshing ? 'not-allowed' : 'pointer',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#0B93E8';
+            if (!isRefreshing) {
+              e.currentTarget.style.backgroundColor = '#0B93E8';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#4DA2FF';
+            if (!isRefreshing) {
+              e.currentTarget.style.backgroundColor = '#4DA2FF';
+            }
           }}
         >
-          Refresh
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
-      {nfts.length === 0 ? (
+      {isLoading ? (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '20px',
+          }}
+        >
+          {[1, 2, 3].map((i) => (
+            <NFTCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : nfts.length === 0 ? (
         <div
           style={{
             display: 'flex',
@@ -190,6 +231,7 @@ export function MyMintedNFTs() {
               price="Not listed"
               url={url}
               onList={(price) => handleList(id, price)}
+              isLoading={listingNftId === id}
             />
           ))}
         </div>
