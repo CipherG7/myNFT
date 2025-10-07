@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { ConnectButton } from "@mysten/dapp-kit";
-import { Box, Container, Flex, Heading } from "@radix-ui/themes";
+import { Heading } from "@radix-ui/themes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import { Toaster } from "react-hot-toast";
 import { MintNFT } from "./components/MintNFT";
 import { Marketplace } from "./components/Marketplace";
 import { MyMintedNFTs } from "./components/MyMintedNFTsNew";
@@ -12,6 +13,41 @@ function App() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F8FAFB' }}>
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#FFFFFF',
+            color: '#1A202C',
+            border: '1px solid #E2E8F0',
+            borderRadius: '8px',
+            padding: '16px',
+            fontSize: '14px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#FFFFFF',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#FFFFFF',
+            },
+          },
+          loading: {
+            iconTheme: {
+              primary: '#4DA2FF',
+              secondary: '#FFFFFF',
+            },
+          },
+        }}
+      />
+
       {/* Header */}
       <div
         style={{
@@ -27,15 +63,17 @@ function App() {
           style={{
             maxWidth: '1280px',
             margin: '0 auto',
-            padding: '16px 24px',
+            padding: '12px 16px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            gap: '12px',
           }}
         >
-          <div style={{ minWidth: '120px' }}>
+          {/* Logo - Always visible */}
+          <div style={{ flexShrink: 0 }}>
             <div style={{
-              fontSize: '1.5rem',
+              fontSize: 'clamp(1.125rem, 4vw, 1.5rem)',
               fontWeight: '700',
               color: '#4DA2FF',
               letterSpacing: '-0.025em'
@@ -43,26 +81,37 @@ function App() {
               SUI NFT
             </div>
           </div>
-          <div>
+
+          {/* Title - Hidden on mobile, shown on tablet+ */}
+          <div style={{
+            display: 'none',
+            flexGrow: 1,
+            textAlign: 'center'
+          }}
+          className="header-title"
+          >
             <Heading
               size="8"
               style={{
                 color: '#1A202C',
                 fontWeight: '700',
-                letterSpacing: '-0.025em'
+                letterSpacing: '-0.025em',
+                fontSize: 'clamp(1.5rem, 3vw, 2.25rem)'
               }}
             >
               NFT Marketplace
             </Heading>
           </div>
-          <div style={{ minWidth: '120px', display: 'flex', justifyContent: 'flex-end' }}>
+
+          {/* Connect Button */}
+          <div style={{ flexShrink: 0 }}>
             <ConnectButton />
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(16px, 4vw, 32px) clamp(12px, 3vw, 24px)' }}>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* Tab Navigation */}
           <div
@@ -71,17 +120,17 @@ function App() {
               border: '1px solid #E2E8F0',
               borderRadius: '12px',
               padding: '8px',
-              marginBottom: '32px',
+              marginBottom: 'clamp(16px, 4vw, 32px)',
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
             }}
           >
-            <TabsList className="grid w-full grid-cols-4 gap-2">
+            <TabsList className="tab-list">
               <TabsTrigger
                 value="my-nfts"
                 style={{
-                  padding: '12px 16px',
+                  padding: 'clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                   borderRadius: '8px',
-                  fontSize: '0.875rem',
+                  fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                   fontWeight: '600',
                   transition: 'all 250ms ease-in-out',
                   backgroundColor: activeTab === 'my-nfts' ? '#4DA2FF' : 'transparent',
@@ -95,9 +144,9 @@ function App() {
               <TabsTrigger
                 value="marketplace"
                 style={{
-                  padding: '12px 16px',
+                  padding: 'clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                   borderRadius: '8px',
-                  fontSize: '0.875rem',
+                  fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                   fontWeight: '600',
                   transition: 'all 250ms ease-in-out',
                   backgroundColor: activeTab === 'marketplace' ? '#4DA2FF' : 'transparent',
@@ -111,9 +160,9 @@ function App() {
               <TabsTrigger
                 value="mint"
                 style={{
-                  padding: '12px 16px',
+                  padding: 'clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                   borderRadius: '8px',
-                  fontSize: '0.875rem',
+                  fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                   fontWeight: '600',
                   transition: 'all 250ms ease-in-out',
                   backgroundColor: activeTab === 'mint' ? '#4DA2FF' : 'transparent',
@@ -127,18 +176,19 @@ function App() {
               <TabsTrigger
                 value="take-profits"
                 style={{
-                  padding: '12px 16px',
+                  padding: 'clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                   borderRadius: '8px',
-                  fontSize: '0.875rem',
+                  fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
                   fontWeight: '600',
                   transition: 'all 250ms ease-in-out',
                   backgroundColor: activeTab === 'take-profits' ? '#4DA2FF' : 'transparent',
                   color: activeTab === 'take-profits' ? '#FFFFFF' : '#64748B',
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
                 }}
                 className="hover:bg-[#E5F3FF]"
               >
-                Take Profits
+                Profits
               </TabsTrigger>
             </TabsList>
           </div>
