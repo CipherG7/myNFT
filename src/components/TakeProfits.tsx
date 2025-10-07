@@ -1,17 +1,24 @@
+import { useState } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Flex, Heading, Text } from "@radix-ui/themes";
 import { Transaction } from "@mysten/sui/transactions";
 import { MARKETPLACE_TYPE } from "../marketplaceConstants";
+import { LoadingSpinner } from "./LoadingSpinner";
+import toast from "react-hot-toast";
 
 export function TakeProfits() {
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
   const account = useCurrentAccount();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   const handleTakeProfits = async () => {
     if (!account) {
-      alert("Please connect your wallet to take profits.");
+      toast.error("Please connect your wallet to take profits");
       return;
     }
+
+    setIsWithdrawing(true);
+    const toastId = toast.loading("Withdrawing profits...");
 
     try {
       const tx = new Transaction();
@@ -27,9 +34,11 @@ export function TakeProfits() {
         transaction: tx,
       });
 
-      alert("Profits withdrawn successfully!");
+      toast.success("Profits withdrawn successfully!", { id: toastId });
     } catch (error) {
-      alert("Failed to take profits: " + error);
+      toast.error(`Failed to withdraw profits: ${error}`, { id: toastId });
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -140,29 +149,38 @@ export function TakeProfits() {
 
         <button
           onClick={handleTakeProfits}
+          disabled={isWithdrawing}
           style={{
-            backgroundColor: '#10B981',
+            backgroundColor: isWithdrawing ? '#94A3B8' : '#10B981',
             color: '#FFFFFF',
             padding: '12px 32px',
             borderRadius: '8px',
             fontSize: '0.875rem',
             fontWeight: '600',
             transition: 'all 250ms ease-in-out',
-            cursor: 'pointer',
+            cursor: isWithdrawing ? 'not-allowed' : 'pointer',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#059669';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+            if (!isWithdrawing) {
+              e.currentTarget.style.backgroundColor = '#059669';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#10B981';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            if (!isWithdrawing) {
+              e.currentTarget.style.backgroundColor = '#10B981';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            }
           }}
         >
-          Withdraw Profits
+          {isWithdrawing && <LoadingSpinner size="sm" color="#FFFFFF" />}
+          {isWithdrawing ? 'Withdrawing...' : 'Withdraw Profits'}
         </button>
       </div>
     </Flex>
