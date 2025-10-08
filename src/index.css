@@ -118,6 +118,13 @@ img {
   }
 }
 
+/* Hide WalletInfo on very small screens */
+@media (max-width: 640px) {
+  .wallet-balance-container {
+    display: none;
+  }
+}
+
 /* Tab List Responsive Grid */
 .tab-list {
   display: grid;
