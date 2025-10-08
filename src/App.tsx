@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ConnectButton } from "@mysten/dapp-kit";
 import { Heading } from "@radix-ui/themes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { Toaster } from "react-hot-toast";
@@ -7,6 +6,7 @@ import { MintNFT } from "./components/MintNFT";
 import { Marketplace } from "./components/Marketplace";
 import { MyMintedNFTs } from "./components/MyMintedNFTsNew";
 import { TakeProfits } from "./components/TakeProfits";
+import { CustomConnectButton } from "./components/CustomConnectButton";
 
 function App() {
   const [activeTab, setActiveTab] = useState("my-nfts");
@@ -103,9 +103,9 @@ function App() {
             </Heading>
           </div>
 
-          {/* Connect Button */}
+          {/* Wallet Section */}
           <div style={{ flexShrink: 0 }}>
-            <ConnectButton />
+            <CustomConnectButton />
           </div>
         </div>
       </div>
