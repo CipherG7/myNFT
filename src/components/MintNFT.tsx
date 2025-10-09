@@ -4,13 +4,14 @@ import { Transaction } from "@mysten/sui/transactions";
 import { Heading } from "@radix-ui/themes";
 import { PACKAGE_ID } from "../constants";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { useNFTStore } from "../store/nftStore";
 import toast from "react-hot-toast";
 
 export function MintNFT() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
-  const [isMinting, setIsMinting] = useState(false);
+  const { isMinting, setIsMinting, onNFTMinted } = useNFTStore();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   const handleMint = async () => {
@@ -25,7 +26,7 @@ export function MintNFT() {
     try {
       const tx = new Transaction();
       tx.moveCall({
-        target: `${PACKAGE_ID}::mynft::mint_to_sender`,
+        target: `${PACKAGE_ID}::testnet_nft::mint_to_sender`,
         arguments: [
           tx.pure.string(name),
           tx.pure.string(description),
@@ -39,12 +40,22 @@ export function MintNFT() {
       });
 
       toast.success("NFT minted successfully!", { id: toastId });
+      
+      // Add the minted NFT to the store
+      // Note: In a real app, you'd want to get the actual NFT ID from the transaction result
+      // For now, we'll use a placeholder and let the refresh handle the real data
+      onNFTMinted({
+        id: `temp-${Date.now()}`, // Temporary ID until refresh
+        name,
+        description,
+        url,
+      });
+      
       setName("");
       setDescription("");
       setUrl("");
     } catch (error) {
       toast.error(`Minting failed: ${error}`, { id: toastId });
-    } finally {
       setIsMinting(false);
     }
   };

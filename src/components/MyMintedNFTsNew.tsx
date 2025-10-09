@@ -5,23 +5,27 @@ import { NFTCardSkeleton } from "./NFTCardSkeleton";
 import { useCurrentAccount, useSuiClient, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { NFT_TYPE } from "../constants";
-import { MARKETPLACE_TYPE } from "../marketplaceConstants";
+import { MARKETPLACE_MODULE } from "../marketplaceConstants";
+import { useNFTStore } from "../store/nftStore";
 import toast from "react-hot-toast";
 
 // Marketplace object ID
 const MARKETPLACE_OBJECT_ID = "0xece2306b9e52fbdafa0405a6276ee2cd182aec1fc5900cc22edadb38414acc1a";
 
-interface OwnedNFT {
-  id: string;
-  name: string;
-  url: string;
-}
-
 export function MyMintedNFTs() {
-  const [nfts, setNfts] = useState<OwnedNFT[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    ownedNFTs,
+    setOwnedNFTs,
+    isLoadingOwnedNFTs,
+    setIsLoadingOwnedNFTs,
+    isListingNFT,
+    setIsListingNFT,
+    onNFTListed,
+    setRefreshOwnedNFTs,
+    refreshMarketplace
+  } = useNFTStore();
+  
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [listingNftId, setListingNftId] = useState<string | null>(null);
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
@@ -30,17 +34,20 @@ export function MyMintedNFTs() {
     console.log("fetchOwnedNFTs called");
     if (!account) {
       console.log("No account connected");
-      setIsLoading(false);
+      setIsLoadingOwnedNFTs(false);
       return;
     }
 
     if (isRefresh) {
       setIsRefreshing(true);
     } else {
-      setIsLoading(true);
+      setIsLoadingOwnedNFTs(true);
     }
 
     try {
+      console.log("Fetching owned objects for address:", account.address);
+      console.log("Using NFT type:", NFT_TYPE);
+      
       const ownedObjects = await suiClient.getOwnedObjects({
         owner: account.address,
         filter: { StructType: NFT_TYPE },
@@ -49,69 +56,113 @@ export function MyMintedNFTs() {
 
       console.log("Owned objects fetched:", ownedObjects.data.length);
 
-      const fetchedNFTs: OwnedNFT[] = ownedObjects.data
+      const fetchedNFTs = ownedObjects.data
         .filter((obj) => obj.data?.content?.dataType === "moveObject")
         .map((obj) => {
-          const content = obj.data!.content as any;
-          const fields = content.fields;
-          return {
-            id: obj.data!.objectId,
-            name: fields.name,
-            url: fields.url.fields.url,
-          };
-        });
+          try {
+            const content = obj.data!.content as any;
+            const fields = content.fields;
+            return {
+              id: obj.data!.objectId,
+              name: fields.name,
+              description: fields.description || "",
+              url: fields.url?.fields?.url || fields.url || "",
+            };
+          } catch (parseError) {
+            console.error("Error parsing NFT:", obj, parseError);
+            return null;
+          }
+        })
+        .filter((nft) => nft !== null);
 
       console.log("NFTs parsed:", fetchedNFTs.length);
 
-      setNfts(fetchedNFTs);
+      setOwnedNFTs(fetchedNFTs);
       if (isRefresh) {
         toast.success("NFTs refreshed successfully");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch owned NFTs", error);
-      toast.error("Failed to load your NFTs");
+      const errorMessage = error?.message || error?.toString() || "Unknown error";
+      toast.error(`Failed to load your NFTs: ${errorMessage}`);
     } finally {
-      setIsLoading(false);
+      setIsLoadingOwnedNFTs(false);
       setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
     fetchOwnedNFTs();
+    setRefreshOwnedNFTs(fetchOwnedNFTs);
   }, [account, suiClient]);
 
   async function handleList(nftId: string, price: number) {
+
+    
     if (!account) {
+      console.log("No account connected");
       toast.error("Please connect your wallet");
       return;
     }
 
-    setListingNftId(nftId);
-    const toastId = toast.loading("Listing NFT...");
+    if (price <= 0) {
+      console.log("Invalid price:", price);
+      toast.error("Price must be greater than 0");
+      return;
+    }
+
+    console.log("Starting listing process...");
+    setIsListingNFT(nftId);
+    const toastId = toast.loading("Listing NFT on marketplace...");
 
     try {
       const tx = new Transaction();
       tx.moveCall({
-        target: `${MARKETPLACE_TYPE}::list`,
+        target: `${MARKETPLACE_MODULE}::list`,
         arguments: [
           tx.object(MARKETPLACE_OBJECT_ID),
           tx.object(nftId),
-          tx.pure.u64(price * 1000000000), // Convert SUI to MIST
+          tx.pure.u64(Math.floor(price * 1000000000)), // Convert SUI to MIST and ensure integer
         ],
       });
-      tx.setGasBudget(10000);
+      tx.setGasBudget(1000000); // Increased gas budget for marketplace operations
 
-      await signAndExecuteTransaction({
+      const result = await signAndExecuteTransaction({
         transaction: tx,
       });
 
-      toast.success("NFT listed successfully!", { id: toastId });
-      // Remove from owned NFTs
-      setNfts((prev) => prev.filter((nft) => nft.id !== nftId));
+      console.log("Listing transaction result:", result);
+      toast.success("NFT listed successfully on marketplace!", { id: toastId });
+      
+      // Update the store with the listing information
+      // We'll use a temporary listing ID until we can get the real one from the transaction
+      const tempListingId = `listing-${nftId}-${Date.now()}`;
+      onNFTListed(nftId, price, tempListingId, account.address);
+      
+      // Refresh marketplace listings to get the actual listing data
+      setTimeout(() => {
+        refreshMarketplace();
+      }, 2000); // Give some time for the transaction to be processed
+      
     } catch (error) {
-      toast.error(`Listing failed: ${error}`, { id: toastId });
-    } finally {
-      setListingNftId(null);
+      console.error("Listing failed:", error);
+      
+      // Provide more specific error messages
+      let errorMessage = "Failed to list NFT";
+      if (error instanceof Error) {
+        if (error.message.includes("Insufficient")) {
+          errorMessage = "Insufficient balance to pay for transaction fees";
+        } else if (error.message.includes("rejected")) {
+          errorMessage = "Transaction was rejected";
+        } else if (error.message.includes("timeout")) {
+          errorMessage = "Transaction timed out. Please try again";
+        } else {
+          errorMessage = `Listing failed: ${error.message}`;
+        }
+      }
+      
+      toast.error(errorMessage, { id: toastId });
+      setIsListingNFT(null);
     }
   }
 
@@ -162,7 +213,7 @@ export function MyMintedNFTs() {
         </button>
       </div>
 
-      {isLoading ? (
+      {isLoadingOwnedNFTs ? (
         <div
           style={{
             display: 'grid',
@@ -174,7 +225,7 @@ export function MyMintedNFTs() {
             <NFTCardSkeleton key={i} />
           ))}
         </div>
-      ) : nfts.length === 0 ? (
+      ) : ownedNFTs.length === 0 ? (
         <div
           style={{
             display: 'flex',
@@ -223,7 +274,7 @@ export function MyMintedNFTs() {
             gap: '20px',
           }}
         >
-          {nfts.map(({ id, name, url }) => (
+          {ownedNFTs.map(({ id, name, url }) => (
             <NFTCard
               key={id}
               id={id}
@@ -231,7 +282,7 @@ export function MyMintedNFTs() {
               price="Not listed"
               url={url}
               onList={(price) => handleList(id, price)}
-              isLoading={listingNftId === id}
+              isLoading={isListingNFT === id}
             />
           ))}
         </div>
