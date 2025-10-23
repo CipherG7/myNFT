@@ -11,6 +11,7 @@ Client dApp using the following tools:
 - [`@mysten/dapp-kit`](https://sdk.mystenlabs.com/dapp-kit) for connecting to
   wallets and loading data
 - [pnpm](https://pnpm.io/) for package management
+- - [Zustand]([https://pnpm.io/](https://zustand-demo.pmnd.rs/)) for state management
 
 ## Starting your dApp
 
