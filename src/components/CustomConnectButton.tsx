@@ -2,12 +2,14 @@ import {
   ConnectButton,
   useCurrentAccount,
   useSuiClientQuery,
+  useDisconnectWallet,
 } from "@mysten/dapp-kit";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 export function CustomConnectButton() {
   const account = useCurrentAccount();
+  const { mutate: disconnect } = useDisconnectWallet();
   const [isOpen, setIsOpen] = useState(false);
 
   // Fetch balance
@@ -214,10 +216,9 @@ export function CustomConnectButton() {
             {/* Disconnect Button */}
             <button
               onClick={() => {
-                // The ConnectButton handles disconnect internally
+                disconnect();
                 setIsOpen(false);
-                // We'll need to use the wallet's disconnect method
-                window.location.reload();
+                toast.success("Wallet disconnected");
               }}
               style={{
                 width: "100%",
