@@ -62,6 +62,8 @@ export function MyMintedNFTs() {
           try {
             const content = obj.data!.content as any;
             const fields = content.fields;
+            console.log("NFT fields:", fields);
+            console.log("URL field:", fields.url);
             return {
               id: obj.data!.objectId,
               name: fields.name,

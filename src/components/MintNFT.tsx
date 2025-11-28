@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { useSignAndExecuteTransaction, useCurrentAccount } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { Heading } from "@radix-ui/themes";
 import { PACKAGE_ID } from "../constants";
@@ -10,52 +10,121 @@ import toast from "react-hot-toast";
 export function MintNFT() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [url, setUrl] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const { isMinting, setIsMinting, onNFTMinted } = useNFTStore();
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const currentAccount = useCurrentAccount();
+
+  // Helper function to convert File to base64
+  const fileToBase64 = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          // Remove the data:image/...;base64, prefix
+          const base64 = reader.result.split(',')[1];
+          resolve(base64);
+        } else {
+          reject(new Error("Failed to read file as base64"));
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleMint = async () => {
-    if (!name || !description || !url) {
-      toast.error("Please fill in all fields");
+    if (!name || !description || !file) {
+      toast.error("Please fill in all fields and select an image");
+      return;
+    }
+
+    if (!currentAccount?.address) {
+      toast.error("Please connect your wallet first");
       return;
     }
 
     setIsMinting(true);
-    const toastId = toast.loading("Minting NFT...");
+    const toastId = toast.loading("Uploading image to Walrus...");
 
     try {
+      // Convert file to base64
+      const fileBase64 = await fileToBase64(file);
+
+      toast.loading("Uploading to publisher...", { id: toastId });
+
+      // Upload to Walrus via publisher (testnet publisher endpoint)
+      const publisherUrl = 'https://publisher.walrus-testnet.walrus.space';
+      const uploadResponse = await fetch(`${publisherUrl}/v1/blobs?epochs=5`, {
+        method: 'PUT',
+        body: file, // Send the file directly
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        throw new Error(`Upload failed: ${uploadResponse.status} - ${errorText}`);
+      }
+
+      const uploadResult = await uploadResponse.json();
+      
+      // The response contains newlyCreated or alreadyCertified with blobId
+      const blobId = uploadResult.newlyCreated?.blobObject?.blobId || 
+                    uploadResult.alreadyCertified?.blobId;
+
+      if (!blobId) {
+        throw new Error('No blob ID returned from upload');
+      }
+
+      console.log("Walrus upload successful. Blob ID:", blobId);
+      console.log("Upload result:", uploadResult);
+
+      // Construct the image URL
+      const imageUrl = `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${blobId}`;
+
+      // If newly created, wait a moment for certification
+      if (uploadResult.newlyCreated) {
+        toast.loading("Waiting for blob certification...", { id: toastId });
+        // Wait 10 seconds for the blob to be certified and become available
+        await new Promise(resolve => setTimeout(resolve, 10000));
+      }
+
+      toast.loading("Minting NFT...", { id: toastId });
+
+      // Create and execute the mint transaction
       const tx = new Transaction();
       tx.moveCall({
         target: `${PACKAGE_ID}::testnet_nft::mint_to_sender`,
         arguments: [
           tx.pure.string(name),
           tx.pure.string(description),
-          tx.pure.string(url),
+          tx.pure.string(imageUrl),
         ],
       });
-      tx.setGasBudget(100000000);
+      // Reduced gas budget - 0.01 SUI should be enough for a simple mint
+      tx.setGasBudget(10000000);
 
       await signAndExecuteTransaction({
         transaction: tx,
       });
 
       toast.success("NFT minted successfully!", { id: toastId });
-      
+
       // Add the minted NFT to the store
-      // Note: In a real app, you'd want to get the actual NFT ID from the transaction result
-      // For now, we'll use a placeholder and let the refresh handle the real data
       onNFTMinted({
-        id: `temp-${Date.now()}`, // Temporary ID until refresh
+        id: `temp-${Date.now()}`,
         name,
         description,
-        url,
+        url: imageUrl,
       });
-      
+
+      // Reset form
       setName("");
       setDescription("");
-      setUrl("");
-    } catch (error) {
-      toast.error(`Minting failed: ${error}`, { id: toastId });
+      setFile(null);
+      setIsMinting(false);
+    } catch (error: any) {
+      console.error("Minting error:", error);
+      toast.error(`Minting failed: ${error.message || error}`, { id: toastId });
       setIsMinting(false);
     }
   };
@@ -136,10 +205,9 @@ export function MintNFT() {
             }}
           />
           <input
-            type="text"
-            placeholder="NFT Image URL"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
             style={{
               width: '100%',
               height: '56px',

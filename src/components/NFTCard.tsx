@@ -16,6 +16,7 @@ interface NFTCardProps {
 export function NFTCard({ id, name, price, url, onBuy, onList, onDelist, isLoading = false }: NFTCardProps) {
   const [listPrice, setListPrice] = useState("");
   const [isHovered, setIsHovered] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   return (
     <div
@@ -35,10 +36,11 @@ export function NFTCard({ id, name, price, url, onBuy, onList, onDelist, isLoadi
           : '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
       }}
     >
-      {url && (
+      {url && !imageError && (
         <img
           src={url}
           alt={name}
+          onError={() => setImageError(true)}
           style={{
             width: '100%',
             height: '192px',
@@ -49,6 +51,41 @@ export function NFTCard({ id, name, price, url, onBuy, onList, onDelist, isLoadi
             backgroundColor: '#F8FAFB',
           }}
         />
+      )}
+      {(!url || imageError) && (
+        <div
+          style={{
+            width: '100%',
+            height: '192px',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            border: '1px solid #E2E8F0',
+            backgroundColor: '#F8FAFB',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: '8px',
+          }}
+        >
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#94A3B8"
+            strokeWidth="1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+          </svg>
+          <span style={{ color: '#94A3B8', fontSize: '0.875rem' }}>
+            {imageError ? 'Image failed to load' : 'No image'}
+          </span>
+        </div>
       )}
       <h3
         style={{

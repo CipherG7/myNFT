@@ -1,4 +1,0 @@
-- [x] Update src/index.css to use @import "tailwindcss"; for Tailwind v4
-- [x] Remove content array from tailwind.config.js as v4 auto-detects content
-- [x] Remove "tailwind": "^4.0.0" from package.json dependencies
-- [ ] Test the configuration by running dev server
