@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Flex, Heading, Text } from "@radix-ui/themes";
 import { Transaction } from "@mysten/sui/transactions";
-import { MARKETPLACE_TYPE } from "../marketplaceConstants";
+import { MARKETPLACE_MODULE } from "../marketplaceConstants";
 import { LoadingSpinner } from "./LoadingSpinner";
 import toast from "react-hot-toast";
 
@@ -23,7 +23,7 @@ export function TakeProfits() {
     try {
       const tx = new Transaction();
       tx.moveCall({
-        target: `${MARKETPLACE_TYPE}::take_profits_and_keep`,
+        target: `${MARKETPLACE_MODULE}::take_profits_and_keep`,
         arguments: [
           tx.object("0xece2306b9e52fbdafa0405a6276ee2cd182aec1fc5900cc22edadb38414acc1a"), // TODO: Replace with actual marketplace object ID
         ],

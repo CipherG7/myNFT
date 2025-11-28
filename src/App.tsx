@@ -7,6 +7,7 @@ import { Marketplace } from "./components/Marketplace";
 import { MyMintedNFTs } from "./components/MyMintedNFTsNew";
 import { TakeProfits } from "./components/TakeProfits";
 import { CustomConnectButton } from "./components/CustomConnectButton";
+import { NFTStoreProvider } from "./components/NFTStoreProvider";
 
 function App() {
   const [activeTab, setActiveTab] = useState("my-nfts");
@@ -111,8 +112,9 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(16px, 4vw, 32px) clamp(12px, 3vw, 24px)' }}>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <NFTStoreProvider>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: 'clamp(16px, 4vw, 32px) clamp(12px, 3vw, 24px)' }}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* Tab Navigation */}
           <div
             style={{
@@ -243,7 +245,8 @@ function App() {
             <TakeProfits />
           </TabsContent>
         </Tabs>
-      </div>
+        </div>
+      </NFTStoreProvider>
     </div>
   );
 }
