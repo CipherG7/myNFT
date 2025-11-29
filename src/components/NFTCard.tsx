@@ -287,6 +287,7 @@ export function NFTCard({ id, name, price, url, onBuy, onList, onDelist, isLoadi
             onChange={(e) => setListPrice(e.target.value)}
             min="0.001"
             step="0.001"
+            className="price-input"
             style={{
               border: '2px solid #E2E8F0',
               borderRadius: '12px',
@@ -307,6 +308,7 @@ export function NFTCard({ id, name, price, url, onBuy, onList, onDelist, isLoadi
               e.currentTarget.style.boxShadow = 'none';
             }}
           />
+          <style dangerouslySetInnerHTML={{ __html: `.price-input input::placeholder { color: #302d2c !important; }` }} />
           {listPrice && parseFloat(listPrice) <= 0 && (
             <p style={{ color: '#EF4444', fontSize: '0.75rem', margin: '4px 0' }}>
               Price must be greater than 0
