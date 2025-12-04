@@ -15,8 +15,8 @@ The project showcases how to:
 
 ## Overview
 
-Frontend: Vite + TypeScript
-Smart Contracts: Sui Move
+Frontend: Vite + TypeScript 
+Smart Contracts: Sui Move 
 Storage: Walrus (for media and metadata storage)
 
 ## Features
