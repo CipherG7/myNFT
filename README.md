@@ -59,7 +59,7 @@ A Sui wallet (such as Slush, Ethos or Suiet)
 
 ## Setup
 1. Clone the repository
-git clone https://github.com/yourusername/myNFT
+git clone https://github.com/CipherG7/myNFT
 cd myNFT
 
 2. Install frontend dependencies
