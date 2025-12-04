@@ -68,14 +68,14 @@ cd myNFT
 
 2. Install frontend dependencies
 ```bash
-cd frontend
+cd src
 npm install
 npm run dev
 ```
 
 3. Build and publish the Move contracts
 ```bash
-cd contracts
+cd myNft
 sui move build
 sui client publish
 ```
