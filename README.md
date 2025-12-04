@@ -15,8 +15,10 @@ The project showcases how to:
 
 ## Overview
 
-Frontend: Vite + TypeScript 
+Frontend: Vite + TypeScript
+
 Smart Contracts: Sui Move 
+
 Storage: Walrus (for media and metadata storage)
 
 ## Features
@@ -59,21 +61,24 @@ A Sui wallet (such as Slush, Ethos or Suiet)
 
 ## Setup
 1. Clone the repository
-'''bash
+```bash
 git clone https://github.com/CipherG7/myNFT
 cd myNFT
-'''
+```
 
-3. Install frontend dependencies
+2. Install frontend dependencies
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-4. Build and publish the Move contracts
+3. Build and publish the Move contracts
+```bash
 cd contracts
 sui move build
 sui client publish
-
+```
 
 Save the published package ID and update the frontend configuration.
 
