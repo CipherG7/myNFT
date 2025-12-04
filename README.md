@@ -59,15 +59,17 @@ A Sui wallet (such as Slush, Ethos or Suiet)
 
 ## Setup
 1. Clone the repository
+'''bash
 git clone https://github.com/CipherG7/myNFT
 cd myNFT
+'''
 
-2. Install frontend dependencies
+3. Install frontend dependencies
 cd frontend
 npm install
 npm run dev
 
-3. Build and publish the Move contracts
+4. Build and publish the Move contracts
 cd contracts
 sui move build
 sui client publish
